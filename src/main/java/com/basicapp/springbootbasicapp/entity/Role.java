@@ -23,7 +23,6 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
-    @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private long id;
 

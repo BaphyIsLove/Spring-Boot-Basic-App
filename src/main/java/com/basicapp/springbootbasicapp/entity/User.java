@@ -30,9 +30,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
-    @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    private long id;
+    private Long id;
     @Column
     private String firstName;
     @Column

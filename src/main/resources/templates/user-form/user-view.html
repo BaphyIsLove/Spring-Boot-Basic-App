@@ -43,10 +43,10 @@
 	<div class="mx-auto col-sm-8 main-section" id="myTab" role="tablist">
 		<ul class="nav nav-tabs justify-content-end">
 			<li class="nav-item">
-			<a class="nav-link active" id="list-tab" data-toggle="tab" href="#list" role="tab" aria-controls="list" aria-selected="false">Lista</a>
+			<a class="nav-link" th:classappend=" ${listTab}" id="list-tab" data-toggle="tab" href="#list" role="tab" aria-controls="list" aria-selected="false">Lista</a>
 			</li>
 			<li class="nav-item">
-			<a class="nav-link" id="form-tab" data-toggle="tab" href="#form" role="tab" aria-controls="form" aria-selected="true">Formulario de Registro</a>				   	
+			<a class="nav-link" th:classappend=" ${formTab}" id="form-tab" data-toggle="tab" href="#form" role="tab" aria-controls="form" aria-selected="true">Formulario de Registro</a>				   	
 			</li>
 		</ul>
 		<div class="tab-content" id="myTabContent">
@@ -56,7 +56,7 @@
 						<h4>Lista de Usuarios</h4>
 					</div>
 					<div class="card-body">
-						<div th:include="user-form/user-list.html" th:remove="tag"></div>
+						<div th:insert="~{user-form/user-list.html}" th:remove="tag"></div>
 					</div>
 				</div>
 			</div>
@@ -66,7 +66,7 @@
 						<h4>Información de Usuario</h4>
 					</div>
 					<div class="card-body">
-                        <div th:include="user-form/user-form.html" th:remove="tag"></div>
+                        <div th:insert="~{user-form/user-form.html}" th:remove="tag"></div>
 					</div>
 				</div>
 			</div>
