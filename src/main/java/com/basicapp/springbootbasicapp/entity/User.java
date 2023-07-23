@@ -14,6 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+// import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,17 +35,26 @@ public class User {
     @GenericGenerator(name = "native", strategy = "native")
     @Setter(AccessLevel.NONE)
     private Long id;
+
     @Column
+    @NotBlank(message = "Introduce un nombre")
     private String firstName;
     @Column
+    @NotBlank(message = "Introduce al menos un apellido")
     private String lastName;
     @Column
+    @NotBlank
+    @Email
     private String email;
     @Column
+    @NotBlank
     private String username;
     @Column
+    @NotBlank
+    // @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$", message = "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número.")
     private String password;
     @Transient
+    @NotBlank
     private String confirmPassword;
 
     @ManyToMany(fetch = FetchType.LAZY)
