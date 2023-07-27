@@ -18,7 +18,10 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+<<<<<<< HEAD
 import jakarta.validation.constraints.NotNull;
+=======
+>>>>>>> e3099e1353ef3d707b6fbca19f59c2b21afe7fa1
 // import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -57,7 +60,11 @@ public class User {
     // @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$", message = "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número.")
     private String password;
     @Transient
+<<<<<<< HEAD
     // @NotBlank
+=======
+    @NotBlank
+>>>>>>> e3099e1353ef3d707b6fbca19f59c2b21afe7fa1
     private String confirmPassword;
 
     @ManyToMany(fetch = FetchType.LAZY)
