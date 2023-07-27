@@ -24,7 +24,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
     @Setter(AccessLevel.NONE)
-    private long id;
+    private Long id;
 
     @Column
     private String name;

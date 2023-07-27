@@ -6,6 +6,7 @@
             <th scope="col">Nombre</th>
             <th scope="col">Apellido</th>
             <th scope="col">Usuario</th>
+            <th scope="col">ROLE</th>
             <th scope="col">E-mail</th>
             <th></th>
         </tr>
@@ -16,9 +17,12 @@
             <td th:text="${user.firstName}"></td>
             <td th:text="${user.lastName}"></td>
             <td th:text="${user.username}"></td>
+            <td>
+                <span th:each="role: ${user.roles}" th:text="${role.name}"></span>
+            </td>
             <td th:text="${user.email}"></td>
             <td>
-                <a href="#" th:href="@{'/editUser'+ ${user.id}}"><i class="fas fa-edit"></i></a> | 
+                <a href="#" th:href="@{'/editUser/'+ ${user.id}}"><i class="fas fa-edit"></i></a> | 
                 <a href="#" th:onclick="javascript:confirmDelete('/' + ${user.id} + '/')"><i class="fas fa-user-times"></i></a>
             </td>
         </tr>
