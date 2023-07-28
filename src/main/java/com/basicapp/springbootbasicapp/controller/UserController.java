@@ -71,7 +71,7 @@ public class UserController {
     }
     
     @GetMapping("/editUser/{id}")
-	public String getEditUserForm(Model model, @PathVariable(name ="id")Long id)throws Exception{
+	public String getEditUserForm(Model model, @PathVariable(name ="id")Long id) throws Exception{
 		User userToEdit = userService.getUserById(id);
 
 		model.addAttribute("userForm", userToEdit);
@@ -115,5 +115,23 @@ public class UserController {
     public String cancelUserForm(ModelMap model){
         return "redirect:/userForm";
     }
+
+    /**
+     * delete User on DataBase
+     * @param model
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/deleteUser/{id}")
+    public String deleteUser(Model model, @PathVariable(name ="id")Long id) throws Exception{
+        System.out.println(id);
+		try {
+            userService.deleteUser(id);
+        } catch (Exception e) {
+            model.addAttribute("listErrorMessage", e.getMessage());
+        }
+		return userForm(model);
+	}
 
 }

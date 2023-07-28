@@ -2,8 +2,6 @@ package com.basicapp.springbootbasicapp.service;
 
 import java.util.Optional;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,5 +72,11 @@ public class UserServiceImpl implements UserService{
 		to.setEmail(from.getEmail());
 		to.setRoles(from.getRoles());
 	}
+
+    @Override
+    public void deleteUser(Long id) throws Exception {
+        User userDelete = repository.findById(id).orElseThrow(() -> new Exception("usuario no encontrado")); 
+        repository.delete(userDelete);
+    }
 
 }
