@@ -8,16 +8,14 @@ Antes de ejecutar la aplicación, asegúrate de configurar correctamente la cone
 ## Configuración de la base de datos
 Antes de ejecutar la aplicación, asegúrate de configurar correctamente la conexión a la base de datos MySQL. Puedes modificar la configuración en el archivo application.properties ubicado en src/main/resources. Asegúrate de proporcionar las credenciales y el nombre de la base de datos correctos.
 
+``` 
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
---- modifica segun sea necesario ---
-spring.datasource.url=jdbc:mysql://localhost:3306/spring_basic_app
-spring.datasource.username=root
-spring.datasource.password=todounamor
---- **************************** ---
+spring.datasource.url=jdbc:mysql://localhost:3306/nombre_de_la_base_de_datos
+spring.datasource.username=nombre_de_usuario
+spring.datasource.password=contraseña
 spring.jpa.show-sql=true
-#crea las tablas al ejecutar el codigo
 spring.jpa.hibernate.ddl-auto=update
-
+```
 
 ## Uso de la aplicación
 La aplicación ofrece una interfaz básica para interactuar con la base de datos mediante las operaciones de CRUD (Crear, Leer, Actualizar y Eliminar) en una entidad.
