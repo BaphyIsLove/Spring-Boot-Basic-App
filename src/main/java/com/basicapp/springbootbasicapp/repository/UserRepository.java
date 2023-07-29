@@ -2,8 +2,6 @@ package com.basicapp.springbootbasicapp.repository;
 
 import java.util.Optional;
 
-import java.util.Optional;
-
 import org.springframework.data.repository.CrudRepository;
 
 import com.basicapp.springbootbasicapp.entity.User;

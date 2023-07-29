@@ -4,8 +4,6 @@ import java.util.Set;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import com.basicapp.springbootbasicapp.service.UserServiceImpl;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

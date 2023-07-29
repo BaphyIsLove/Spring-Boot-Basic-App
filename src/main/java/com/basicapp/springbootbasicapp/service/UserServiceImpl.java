@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.basicapp.springbootbasicapp.entity.User;
 import com.basicapp.springbootbasicapp.repository.UserRepository;
+import com.basicapp.springbootbasicapp.dto.ChangePassword;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -77,6 +78,23 @@ public class UserServiceImpl implements UserService{
     public void deleteUser(Long id) throws Exception {
         User userDelete = repository.findById(id).orElseThrow(() -> new Exception("usuario no encontrado")); 
         repository.delete(userDelete);
+    }
+
+    @Override
+    public User ChangePassword(ChangePassword form) throws Exception {
+        User storedUser = repository.findById(form.getId()).orElseThrow(() -> new Exception("usuario no encontrado"));
+            if(!form.getCurrentPassword().equals(storedUser.getPassword())){
+                throw new Exception("contraseña actual incorrecta");
+            }
+            if(form.getCurrentPassword().equals(form.getNewPassword())){
+                throw new Exception("La nueva contraseña no debe ser igual a la actual");
+            }
+            if(!form.getNewPassword().equals(form.getConfirmPassword())){
+                throw new Exception("Las contraseñas no coinciden");
+            }
+
+            storedUser.setPassword(form.getNewPassword());
+            return repository.save(storedUser);
     }
 
 }

@@ -1,15 +1,20 @@
 package com.basicapp.springbootbasicapp.controller;
 
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.web.bind.annotation.RequestBody;
+import com.basicapp.springbootbasicapp.dto.ChangePassword;
 import com.basicapp.springbootbasicapp.entity.User;
 import com.basicapp.springbootbasicapp.repository.RoleRepository;
 import com.basicapp.springbootbasicapp.repository.UserRepository;
@@ -79,7 +84,7 @@ public class UserController {
 		model.addAttribute("roles",roleRepository.findAll());
 		model.addAttribute("formTab","active");
 		model.addAttribute("editMode","true");
-        // System.out.println(userToEdit.toString());
+        model.addAttribute("passwordForm", new ChangePassword(id));
 		return "user-form/user-view";
 	}
     
@@ -89,6 +94,7 @@ public class UserController {
             model.addAttribute("userForm", new User());
             model.addAttribute("formTab", "active");
             model.addAttribute("editMode", "true");
+            model.addAttribute("passwordForm", new ChangePassword(user.getId()));
         } else {
             try {
                 userService.updateUser(user);
@@ -102,6 +108,7 @@ public class UserController {
                 model.addAttribute("userList", userService.getAllUsers());
                 model.addAttribute("roles", roleRepository.findAll());
                 model.addAttribute("editMode", "true");
+                model.addAttribute("passwordForm", new ChangePassword(user.getId()));
             }
         }
         model.addAttribute("userList", userService.getAllUsers());
@@ -110,22 +117,32 @@ public class UserController {
         return "user-form/user-view";   
         
     }
+
+    @PostMapping("/editUser/changePassword")
+    public ResponseEntity<?> postEditChangePassword(@Valid @RequestBody ChangePassword form, Errors errors){
+        try {
+            if (errors.hasErrors()) {
+	            String result = errors.getAllErrors()
+	                        .stream().map(x -> x.getDefaultMessage())
+	                        .collect(Collectors.joining("<br/>"));
+                throw new Exception(result);
+            }
+
+            userService.ChangePassword(form);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok("success");
+    }
     
     @GetMapping("/userForm/cancel")
     public String cancelUserForm(ModelMap model){
         return "redirect:/userForm";
     }
 
-    /**
-     * delete User on DataBase
-     * @param model
-     * @param id
-     * @return
-     * @throws Exception
-     */
     @GetMapping("/deleteUser/{id}")
     public String deleteUser(Model model, @PathVariable(name ="id")Long id) throws Exception{
-        System.out.println(id);
 		try {
             userService.deleteUser(id);
         } catch (Exception e) {

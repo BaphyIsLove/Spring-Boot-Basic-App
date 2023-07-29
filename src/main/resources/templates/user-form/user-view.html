@@ -73,6 +73,7 @@
 		</div>
 	</div>
 </div>
+<div th:if="${editMode}" th:insert="~{user-form/change-password.html}" th:remove="tag"></div>
 <div th:insert="~{user-form/confirm-delete-modal.html}" th:remove="tag"></div>
 </body>
 </html>
