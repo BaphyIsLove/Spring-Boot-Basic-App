@@ -38,7 +38,7 @@ public class User {
     // @Setter(AccessLevel.NONE)
     private Long id;
 
-    @Column
+    @Column(unique = true)
     @NotBlank(message = "Introduce un nombre")
     private String firstName;
     @Column

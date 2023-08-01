@@ -4,6 +4,13 @@
 	<input class="form-control" type="hidden" th:field="${userForm.password}" th:if="${editMode}">
 
 	<div class="form-group row">
+		<label class="col-lg-3 col-form-label form-control-label">Usuario</label>
+		<div class="col-lg-9">
+			<input class="form-control" type="text" th:field="${userForm.username}" ¿>
+			<div class="alert-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Usuario incorrecto</div>
+		</div>
+	</div>
+	<div class="form-group row">
 		<label class="col-lg-3 col-form-label form-control-label">Nombre</label>
 		<div class="col-lg-9">
 			<input class="form-control" type="text" th:field="${userForm.firstName}">
@@ -24,21 +31,26 @@
 			<div class="alert-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Verificar email</div>
 		</div>
 	</div>
-	<div class="form-group row">
-		<label class="col-lg-3 col-form-label form-control-label">Usuario</label>
-		<div class="col-lg-9">
-			<input class="form-control" type="text" th:field="${userForm.username}">
-			<div class="alert-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Usuario incorrecto</div>
+	<div th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+		<div class="form-group row" >
+			<label th:text="Roles" class="col-lg-3 col-form-label form-control-label"></label>
+			<div class="col-lg-9">
+				<select th:field="${userForm.roles}" class="form-control" size="3">
+					<option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+				</select>
+				<div class="alert-danger" th:if="${#fields.hasErrors('roles')}" th:errors="*{roles}">Asigna un role</div>
+			</div>
 		</div>
 	</div>
-	<div class="form-group row">
-		<label th:text="Roles" class="col-lg-3 col-form-label form-control-label"></label>
-		<div class="col-lg-9">
-			<select th:field="${userForm.roles}" class="form-control" size="3">
-				<option th:each="role :${roles}" th:value="${role.id}" th:text="${role.name}">
-				</option>
-			</select>
-			<div class="alert-danger" th:if="${#fields.hasErrors('roles')}" th:errors="*{roles}">Asigna un role</div>
+	<div th:if="${#authorization.expression('hasRole(''ROLE_SUPERVISOR'')')}">
+		<div class="form-group row">
+			<label th:text="Roles" class="col-lg-3 col-form-label form-control-label"></label>
+			<div class="col-lg-9">
+				<select th:field="${userForm.roles}" class="form-control" size="1">
+					<option th:value="${2}" th:text="USER"></option>
+				</select>
+				<div class="alert-danger" th:if="${#fields.hasErrors('roles')}" th:errors="*{roles}">Asigna un role</div>
+			</div>
 		</div>
 	</div>
 	<div class="form-group row" th:if="${editMode==null or editMode==false}">
@@ -51,14 +63,14 @@
 	<div class="form-group row" th:if="${editMode==null or editMode==false}">
 		<label class="col-lg-3 col-form-label form-control-label">Confirmar Contraseña</label>
 		<div class="col-lg-9">
-			<input class="form-control" type="password" th:field="${userForm.confirmPassword}" >
+			<input class="form-control" type="password" th:field="${userForm.confirmPassword}" th:disabled="${disableFields}">
 			<div class="alert-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Verificar contraseña</div>
 		</div>
 	</div>
 	<div class="form-group row">
 		<div class="col-lg-12 text-center">
 			<a class="btn btn-secondary" th:href="@{/userForm/cancel}">Cancelar</a>
-			<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#changePasswordModal">Cambiar contraseña</button>
+			<button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#changePasswordModal" th:if="${editMode}">Cambiar contraseña</button>
 			<input type="submit" class="btn btn-primary"
 				value="Guardar Cambios" th:value="${editMode}?'Guardar Cambios':'Crear Usuario'">
 		</div>

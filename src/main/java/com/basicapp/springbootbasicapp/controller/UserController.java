@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -34,7 +35,7 @@ public class UserController {
     UserService userService;
 
     // pagina de inicio (login)
-    @GetMapping("/")
+    @GetMapping({"/","/login"})
     public String index() {
         return "index";
     }
@@ -48,7 +49,7 @@ public class UserController {
         model.addAttribute("listTab", "active");
         return "user-form/user-view";
     }
-
+    
     @PostMapping("/userForm")
     public String createUser(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model){
         if(result.hasErrors()){
@@ -142,6 +143,7 @@ public class UserController {
     }
 
     @GetMapping("/deleteUser/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String deleteUser(Model model, @PathVariable(name ="id")Long id) throws Exception{
 		try {
             userService.deleteUser(id);

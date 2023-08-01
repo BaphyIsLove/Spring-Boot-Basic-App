@@ -3,6 +3,9 @@ package com.basicapp.springbootbasicapp.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.basicapp.springbootbasicapp.entity.User;
@@ -14,6 +17,9 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     UserRepository repository;
+
+    @Autowired
+    BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public Iterable<User> getAllUsers() {
@@ -43,6 +49,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public User createUser(User user) throws Exception {
         if(checkUsernameAndEmailAvaible(user)&&checkPasswordValid(user)){
+            String encodePassword = passwordEncoder.encode(user.getPassword());
+            user.setPassword(encodePassword);
             user = repository.save(user);
         }
         return user;
@@ -83,7 +91,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public User ChangePassword(ChangePassword form) throws Exception {
         User storedUser = repository.findById(form.getId()).orElseThrow(() -> new Exception("usuario no encontrado"));
-            if(!form.getCurrentPassword().equals(storedUser.getPassword())){
+            if(!isLoggerUserAdmin() && !form.getCurrentPassword().equals(storedUser.getPassword())){
                 throw new Exception("contraseña actual incorrecta");
             }
             if(form.getCurrentPassword().equals(form.getNewPassword())){
@@ -93,8 +101,21 @@ public class UserServiceImpl implements UserService{
                 throw new Exception("Las contraseñas no coinciden");
             }
 
-            storedUser.setPassword(form.getNewPassword());
+            String encodePassword = passwordEncoder.encode(form.getNewPassword());
+            storedUser.setPassword(encodePassword);
             return repository.save(storedUser);
     }
 
+    private boolean isLoggerUserAdmin(){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails loggedUser = null;
+        if(principal instanceof UserDetails){
+            loggedUser = (UserDetails) principal;
+            loggedUser.getAuthorities().stream()
+                .filter(x -> "ROLE_ADMIN".equals(x.getAuthority()))
+                .findFirst().orElse(null);
+        }
+        return loggedUser != null ?true :false;
+    }
+    
 }
