@@ -23,7 +23,7 @@
             <td th:text="${user.email}"></td>
             <td>
                 <span th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')} 
-                        or (${#authorization.expression('hasRole(''ROLE_SUPERVISOR'') or hasRole(''ROLE_USER'')')} 
+                        or (!${#authorization.expression('hasRole(''ROLE_ADMIN'')')} 
                         and ${#authentication.getPrincipal.username==user.username})">
                     <a href="#" th:href="@{'/editUser/'+ ${user.id}}"><i class="fas fa-edit"></i></a> | 
                 </span>
