@@ -3,7 +3,9 @@ package com.basicapp.springbootbasicapp.controller;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.basicapp.springbootbasicapp.Exception.UsernameOrIdNotExistException;
 import com.basicapp.springbootbasicapp.dto.ChangePassword;
 import com.basicapp.springbootbasicapp.entity.User;
 import com.basicapp.springbootbasicapp.repository.RoleRepository;
@@ -60,8 +63,8 @@ public class UserController {
                 userService.createUser(user);
                 model.addAttribute("userForm", new User());
                 model.addAttribute("listTab", "active");
-            } catch (Exception e) {
-                model.addAttribute("formErrorMessage", e.getMessage());
+            } catch (PermissionDeniedDataAccessException e) {
+                model.addAttribute("permisionErrorMessage", e.getMessage());
                 model.addAttribute("userForm", user);
                 model.addAttribute("formTab", "active");
                 model.addAttribute("userList", userService.getAllUsers());
@@ -89,7 +92,7 @@ public class UserController {
             model.addAttribute("passwordForm", new ChangePassword(id));
             return "user-form/user-view";
             
-        } catch (Exception e) {
+        } catch (UsernameOrIdNotExistException e) {
             model.addAttribute("formErrorMessage", e.getMessage());
             return "error/404";
         }
@@ -97,7 +100,7 @@ public class UserController {
 	}
     
     @PostMapping("/editUser")
-	public String postEditUserForm(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model) {
+	public String postEditUserForm(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model) throws Exception {
 		try {
 			if(result.hasErrors()) {
 				model.addAttribute("userForm", user);
@@ -105,8 +108,8 @@ public class UserController {
 			}else {
 				userService.updateUser(user);
 			}
-		} catch (Exception e) {
-            model.addAttribute("formErrorMessage", e.getMessage());
+		} catch (PermissionDeniedDataAccessException e) {
+            model.addAttribute("permisionErrorMessage", e.getMessage());
 			model.addAttribute("editMode",true);
 			model.addAttribute("userForm", user);
 			model.addAttribute("passwordForm",new ChangePassword(user.getId()));
@@ -140,11 +143,12 @@ public class UserController {
     }
 
     @GetMapping("/deleteUser/{id}")
-    public String deleteUser(Model model, @PathVariable(name ="id")Long id) {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String deleteUser(Model model, @PathVariable(name ="id")Long id) throws Exception {
 		try {
             userService.deleteUser(id);
-        } catch (Exception e) {
-            model.addAttribute("formErrorMessage", e.getMessage());
+        } catch (PermissionDeniedDataAccessException e) {
+            model.addAttribute("permisionErrorMessage", e.getMessage());
             return "error/403";
         }
 		return userForm(model);

@@ -3,6 +3,7 @@ package com.basicapp.springbootbasicapp.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.basicapp.springbootbasicapp.entity.User;
 import com.basicapp.springbootbasicapp.repository.UserRepository;
+import com.basicapp.springbootbasicapp.Exception.UsernameOrIdNotExistException;
 import com.basicapp.springbootbasicapp.dto.ChangePassword;
 
 @Service
@@ -31,7 +33,7 @@ public class UserServiceImpl implements UserService{
         Optional<User> userFound = repository.findByUsername(user.getUsername());
         Optional<User> emailFound = repository.findByEmail(user.getEmail());
         if(userFound.isPresent()){
-            throw new Exception("Usuario no disponible");
+            throw new UsernameOrIdNotExistException("Usuario no disponible");
         } else if(emailFound.isPresent()){
             throw new Exception("email ya registrado");
         } else{
@@ -48,7 +50,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User createUser(User user) throws Exception, Exception {
+    public User createUser(User user) throws Exception {
         if(!isLoggedUserRole()){
             if(checkUsernameAndEmailAvaible(user)&&checkPasswordValid(user)){
                 String encodePassword = passwordEncoder.encode(user.getPassword());
@@ -57,13 +59,13 @@ public class UserServiceImpl implements UserService{
             }
             return user;
         } else {
-            throw new Exception("no tienes permiso para crear usuarios");
+            throw new PermissionDeniedDataAccessException("No tienes permitido crear nuevos usuarios", new Throwable("Acceso denegado"));
         }
     }
 
     @Override
     public User getUserById(Long id) throws Exception {
-        return repository.findById(id).orElseThrow(() -> new Exception("Usuario no encontrado"));    
+        return repository.findById(id).orElseThrow(() -> new UsernameOrIdNotExistException("Usuario no encontrado"));    
     }
 
 	@Override
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService{
             mapUser(fromUser, toUser);
             return repository.save(toUser);
         } else{
-            throw new Exception("No tienes permitido modificar a otros usuarios");
+            throw new PermissionDeniedDataAccessException("No tienes permitido modificar a otros usuarios", new Throwable("Acceso denegado"));
         }
 	}
 
@@ -96,13 +98,13 @@ public class UserServiceImpl implements UserService{
             User userDelete = repository.findById(id).orElseThrow(() -> new Exception()); 
             repository.delete(userDelete);
         } else{
-            throw new Exception("No tienes permitido eliminar este usuario");
+            throw new PermissionDeniedDataAccessException("No tienes permitido eliminar este usuario", new Throwable("Acceso denegado"));
         }
     }
 
     @Override
     public User ChangePassword(ChangePassword form) throws Exception {
-        User storedUser = repository.findById(form.getId()).orElseThrow(() -> new Exception("usuario no encontrado"));
+        User storedUser = repository.findById(form.getId()).orElseThrow(() -> new UsernameOrIdNotExistException("usuario no encontrado"));
             if(!isLoggerUserAdmin() && !form.getCurrentPassword().equals(storedUser.getPassword())){
                 throw new Exception("contraseña actual incorrecta");
             }
