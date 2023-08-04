@@ -1,12 +1,12 @@
 <form class="form" role="form" autocomplete="off"  th:object="${userForm}" th:action="${editMode} ?@{/editUser} :@{/userForm}" method="post">
 	<!--Es necesario para poder pasar la validacion del Model-->
 	<input class="form-control" type="hidden" th:field="${userForm.id}" th:if="${editMode}">
-	<input class="form-control" type="hidden" th:field="${userForm.password}" th:if="${editMode}">
+	<input class="form-control" type="hidden" name="password" value="xxxx" th:if="${editMode}">
 
 	<div class="form-group row">
 		<label class="col-lg-3 col-form-label form-control-label">Usuario</label>
 		<div class="col-lg-9">
-			<input class="form-control" type="text" th:field="${userForm.username}" ¿>
+			<input class="form-control" type="text" th:field="${userForm.username}">
 			<div class="alert-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Usuario incorrecto</div>
 		</div>
 	</div>

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.basicapp.springbootbasicapp.entity.User;
 import com.basicapp.springbootbasicapp.repository.UserRepository;
+import com.basicapp.springbootbasicapp.Exception.CustomFieldValidationException;
 import com.basicapp.springbootbasicapp.Exception.UsernameOrIdNotExistException;
 import com.basicapp.springbootbasicapp.dto.ChangePassword;
 
@@ -33,7 +34,7 @@ public class UserServiceImpl implements UserService{
         Optional<User> userFound = repository.findByUsername(user.getUsername());
         Optional<User> emailFound = repository.findByEmail(user.getEmail());
         if(userFound.isPresent()){
-            throw new UsernameOrIdNotExistException("Usuario no disponible");
+            throw new CustomFieldValidationException("Usuario no disponible", "username");
         } else if(emailFound.isPresent()){
             throw new Exception("email ya registrado");
         } else{
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService{
     
     private boolean checkPasswordValid(User user) throws Exception{
         if(!user.getPassword().equals(user.getConfirmPassword())){
-            throw new Exception("Las contraseñas no coinciden");
+            throw new CustomFieldValidationException("Las contraseñas no coinciden", "password");
         } else{
             return true;
         }
@@ -56,8 +57,10 @@ public class UserServiceImpl implements UserService{
                 String encodePassword = passwordEncoder.encode(user.getPassword());
                 user.setPassword(encodePassword);
                 user = repository.save(user);
+                return user;
+            } else {
+                throw new Exception("Verifica los campos");
             }
-            return user;
         } else {
             throw new PermissionDeniedDataAccessException("No tienes permitido crear nuevos usuarios", new Throwable("Acceso denegado"));
         }

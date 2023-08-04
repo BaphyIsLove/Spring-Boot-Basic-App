@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 import com.basicapp.springbootbasicapp.service.UserDetailsServiceImpl;
 
@@ -24,6 +26,7 @@ public class SecurityConfig {
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+        AuthenticationFailureHandler authenticationFailureHandler = new SimpleUrlAuthenticationFailureHandler("/login?error=true");     
         return http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests((auth) -> auth
@@ -37,6 +40,7 @@ public class SecurityConfig {
                 .failureForwardUrl("/login?error=true")
                 .usernameParameter("username")
                 .passwordParameter("password")
+                .failureHandler(authenticationFailureHandler)
                 )
             .logout(logout -> logout
                 .permitAll()

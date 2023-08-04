@@ -5,9 +5,6 @@ Este es un proyecto de una aplicación básica desarrollada en Spring Boot con J
 ## Configuración de la base de datos
 Antes de ejecutar la aplicación, asegúrate de configurar correctamente la conexión a la base de datos MySQL. Puedes modificar la configuración en el archivo application.properties ubicado en src/main/resources. Asegúrate de proporcionar las credenciales y el nombre de la base de datos correctos.
 
-## Configuración de la base de datos
-Antes de ejecutar la aplicación, asegúrate de configurar correctamente la conexión a la base de datos MySQL. Puedes modificar la configuración en el archivo application.properties ubicado en src/main/resources. Asegúrate de proporcionar las credenciales y el nombre de la base de datos correctos.
-
 ``` 
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.datasource.url=jdbc:mysql://localhost:3306/nombre_de_la_base_de_datos

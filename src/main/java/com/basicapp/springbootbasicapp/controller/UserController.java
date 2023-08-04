@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.basicapp.springbootbasicapp.Exception.CustomFieldValidationException;
 import com.basicapp.springbootbasicapp.Exception.UsernameOrIdNotExistException;
 import com.basicapp.springbootbasicapp.dto.ChangePassword;
 import com.basicapp.springbootbasicapp.entity.User;
@@ -63,14 +64,28 @@ public class UserController {
                 userService.createUser(user);
                 model.addAttribute("userForm", new User());
                 model.addAttribute("listTab", "active");
-            } catch (PermissionDeniedDataAccessException e) {
-                model.addAttribute("permisionErrorMessage", e.getMessage());
+            } catch (CustomFieldValidationException e) {
+                result.rejectValue(e.getFieldName(), null, e.getMessage());
                 model.addAttribute("userForm", user);
                 model.addAttribute("formTab", "active");
                 model.addAttribute("userList", userService.getAllUsers());
                 model.addAttribute("roles", roleRepository.findAll());
-                return "error/403";
-            }
+            } catch (PermissionDeniedDataAccessException e) {
+            model.addAttribute("permisionErrorMessage", e.getMessage());
+            model.addAttribute("editMode",true);
+            model.addAttribute("userForm", user);
+            model.addAttribute("passwordForm",new ChangePassword(user.getId()));
+            model.addAttribute("formTab","active");
+            return "error/403";
+            } catch (Exception e) {
+            model.addAttribute("formErrorMessage", e.getMessage());
+            model.addAttribute("editMode",true);
+            model.addAttribute("userForm", user);
+            model.addAttribute("passwordForm",new ChangePassword(user.getId()));
+            model.addAttribute("formTab","active");
+            return "error/403";
+		    } 
+
         }
         model.addAttribute("userList", userService.getAllUsers());
         model.addAttribute("roles", roleRepository.findAll());
