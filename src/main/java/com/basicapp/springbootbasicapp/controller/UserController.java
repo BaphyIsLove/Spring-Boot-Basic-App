@@ -4,7 +4,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.basicapp.springbootbasicapp.dto.ChangePassword;
 import com.basicapp.springbootbasicapp.entity.User;
 import com.basicapp.springbootbasicapp.repository.RoleRepository;
@@ -51,7 +51,7 @@ public class UserController {
     }
     
     @PostMapping("/userForm")
-    public String createUser(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model){
+    public String createUser(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model) throws Exception, Exception{
         if(result.hasErrors()){
             model.addAttribute("userForm", user);
             model.addAttribute("formTab", "active");
@@ -62,11 +62,11 @@ public class UserController {
                 model.addAttribute("listTab", "active");
             } catch (Exception e) {
                 model.addAttribute("formErrorMessage", e.getMessage());
-                System.out.println(model.addAttribute("fromErrorMessage", e.getMessage()));
                 model.addAttribute("userForm", user);
                 model.addAttribute("formTab", "active");
                 model.addAttribute("userList", userService.getAllUsers());
                 model.addAttribute("roles", roleRepository.findAll());
+                return "error/403";
             }
         }
         model.addAttribute("userList", userService.getAllUsers());
@@ -78,46 +78,43 @@ public class UserController {
     
     @GetMapping("/editUser/{id}")
 	public String getEditUserForm(Model model, @PathVariable(name ="id")Long id) throws Exception{
-		User userToEdit = userService.getUserById(id);
+        try {
+            User userToEdit = userService.getUserById(id);
+            model.addAttribute("userForm", userToEdit);
+                
+            model.addAttribute("userList", userService.getAllUsers());
+            model.addAttribute("roles",roleRepository.findAll());
+            model.addAttribute("formTab","active");
+            model.addAttribute("editMode","true");
+            model.addAttribute("passwordForm", new ChangePassword(id));
+            return "user-form/user-view";
+            
+        } catch (Exception e) {
+            model.addAttribute("formErrorMessage", e.getMessage());
+            return "error/404";
+        }
 
-		model.addAttribute("userForm", userToEdit);
-		model.addAttribute("userList", userService.getAllUsers());
-		model.addAttribute("roles",roleRepository.findAll());
-		model.addAttribute("formTab","active");
-		model.addAttribute("editMode","true");
-        model.addAttribute("passwordForm", new ChangePassword(id));
-		return "user-form/user-view";
 	}
     
     @PostMapping("/editUser")
-    public String postEditUserForm(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model){
-        if(result.hasErrors()){
-            model.addAttribute("userForm", new User());
-            model.addAttribute("formTab", "active");
-            model.addAttribute("editMode", "true");
-            model.addAttribute("passwordForm", new ChangePassword(user.getId()));
-        } else {
-            try {
-                userService.updateUser(user);
-                model.addAttribute("userForm", new User());
-                model.addAttribute("listTab", "active");
-            } catch (Exception e) {
-                model.addAttribute("formErrorMessage", e.getMessage());
-                System.out.println(model.addAttribute("fromErrorMessage", e.getMessage()));
-                model.addAttribute("userForm", user);
-                model.addAttribute("formTab", "active");
-                model.addAttribute("userList", userService.getAllUsers());
-                model.addAttribute("roles", roleRepository.findAll());
-                model.addAttribute("editMode", "true");
-                model.addAttribute("passwordForm", new ChangePassword(user.getId()));
-            }
-        }
-        model.addAttribute("userList", userService.getAllUsers());
-        model.addAttribute("roles", roleRepository.findAll());
-        
-        return "user-form/user-view";   
-        
-    }
+	public String postEditUserForm(@Valid @ModelAttribute("userForm")User user, BindingResult result, ModelMap model) {
+		try {
+			if(result.hasErrors()) {
+				model.addAttribute("userForm", user);
+				model.addAttribute("formTab","active");
+			}else {
+				userService.updateUser(user);
+			}
+		} catch (Exception e) {
+            model.addAttribute("formErrorMessage", e.getMessage());
+			model.addAttribute("editMode",true);
+			model.addAttribute("userForm", user);
+			model.addAttribute("passwordForm",new ChangePassword(user.getId()));
+			model.addAttribute("formTab","active");
+            return "error/403";
+		} 
+		return "redirect:/userForm";
+	}
 
     @PostMapping("/editUser/changePassword")
     public ResponseEntity<?> postEditChangePassword(@Valid @RequestBody ChangePassword form, Errors errors){
@@ -143,12 +140,12 @@ public class UserController {
     }
 
     @GetMapping("/deleteUser/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String deleteUser(Model model, @PathVariable(name ="id")Long id) throws Exception{
+    public String deleteUser(Model model, @PathVariable(name ="id")Long id) {
 		try {
             userService.deleteUser(id);
         } catch (Exception e) {
-            model.addAttribute("listErrorMessage", e.getMessage());
+            model.addAttribute("formErrorMessage", e.getMessage());
+            return "error/403";
         }
 		return userForm(model);
 	}

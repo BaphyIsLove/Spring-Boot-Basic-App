@@ -3,6 +3,7 @@ package com.basicapp.springbootbasicapp.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -47,25 +48,33 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User createUser(User user) throws Exception {
-        if(checkUsernameAndEmailAvaible(user)&&checkPasswordValid(user)){
-            String encodePassword = passwordEncoder.encode(user.getPassword());
-            user.setPassword(encodePassword);
-            user = repository.save(user);
+    public User createUser(User user) throws Exception, Exception {
+        if(!isLoggedUserRole()){
+            if(checkUsernameAndEmailAvaible(user)&&checkPasswordValid(user)){
+                String encodePassword = passwordEncoder.encode(user.getPassword());
+                user.setPassword(encodePassword);
+                user = repository.save(user);
+            }
+            return user;
+        } else {
+            throw new Exception("no tienes permiso para crear usuarios");
         }
-        return user;
     }
 
     @Override
     public User getUserById(Long id) throws Exception {
-        return repository.findById(id).orElseThrow(() -> new Exception("No se encontro ningun usuario con ese id"));    
+        return repository.findById(id).orElseThrow(() -> new Exception("Usuario no encontrado"));    
     }
 
 	@Override
 	public User updateUser(User fromUser) throws Exception {
-		User toUser = getUserById(fromUser.getId());
-		mapUser(fromUser, toUser);
-		return repository.save(toUser);
+        if(isLoggerUserAdmin()||isUserEditOwnInfo(fromUser.getId())){
+            User toUser = getUserById(fromUser.getId());
+            mapUser(fromUser, toUser);
+            return repository.save(toUser);
+        } else{
+            throw new Exception("No tienes permitido modificar a otros usuarios");
+        }
 	}
 
 	/**
@@ -74,7 +83,6 @@ public class UserServiceImpl implements UserService{
 	 * @param to
 	 */
 	protected void mapUser(User from,User to) {
-        // to.setId(from.getId());
 		to.setUsername(from.getUsername());
 		to.setFirstName(from.getFirstName());
 		to.setLastName(from.getLastName());
@@ -84,8 +92,12 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void deleteUser(Long id) throws Exception {
-        User userDelete = repository.findById(id).orElseThrow(() -> new Exception("usuario no encontrado")); 
-        repository.delete(userDelete);
+        if(isLoggerUserAdmin()&&!isUserEditOwnInfo(id)){
+            User userDelete = repository.findById(id).orElseThrow(() -> new Exception()); 
+            repository.delete(userDelete);
+        } else{
+            throw new Exception("No tienes permitido eliminar este usuario");
+        }
     }
 
     @Override
@@ -106,16 +118,37 @@ public class UserServiceImpl implements UserService{
             return repository.save(storedUser);
     }
 
-    private boolean isLoggerUserAdmin(){
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetails loggedUser = null;
-        if(principal instanceof UserDetails){
-            loggedUser = (UserDetails) principal;
-            loggedUser.getAuthorities().stream()
-                .filter(x -> "ROLE_ADMIN".equals(x.getAuthority()))
-                .findFirst().orElse(null);
+    private boolean isLoggerUserAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication.getAuthorities().stream()
+                    .anyMatch(auth -> "ROLE_ADMIN".equals(auth.getAuthority()));
         }
-        return loggedUser != null ?true :false;
+        return false;
+    }
+
+    private boolean isUserEditOwnInfo(Long id) throws Exception{
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if(authentication != null && authentication.isAuthenticated()){
+            User userInForm = repository.findById(id).orElseThrow(() -> new Exception("usuario no encontrado"));
+            String usernameInForm = userInForm.getUsername();
+            String loggedUsername = userDetails.getUsername();
+            
+            return loggedUsername.equals(usernameInForm);
+        }
+
+        return false;
     }
     
+    private boolean isLoggedUserRole(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth != null && auth.isAuthenticated()){
+            return auth.getAuthorities().stream()
+                    .anyMatch(authen -> "ROLE_USER".equals(authen.getAuthority()));
+        }
+        return false;
+
+    }
+
 }

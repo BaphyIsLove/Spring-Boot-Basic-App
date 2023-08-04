@@ -25,7 +25,7 @@
                 <span th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')} 
                         or (!${#authorization.expression('hasRole(''ROLE_ADMIN'')')} 
                         and ${#authentication.getPrincipal.username==user.username})">
-                    <a href="#" th:href="@{'/editUser/'+ ${user.id}}"><i class="fas fa-edit"></i></a> | 
+                    <a href="#" th:href="@{'/editUser/'+ ${user.id}}"><i class="fas fa-edit"></i></a>
                 </span>
                 <span th:if="${#authorization.expression('hasRole(''ROLE_ADMIN'')')}  
                         and !${#authentication.getPrincipal.username==user.username}">
